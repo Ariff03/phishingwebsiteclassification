@@ -313,7 +313,7 @@ Training scripts generate:
 
 - **Course**: Final Year Project — CSP650 (Computing Project)
 - **Institution**: Universiti Teknologi MARA (UiTM), Malaysia
-- **Dataset Reference**: Derived from the UCI Machine Learning Repository (Phishing Websites Dataset).
+- **Dataset Reference**: Derived from Kaggle (Phishing Websites Dataset).
 - **Libraries & Tools**: Flask, Scikit-learn, XGBoost, BeautifulSoup4, python-whois, dnspython.
 
 ---
