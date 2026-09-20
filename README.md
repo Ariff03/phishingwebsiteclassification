@@ -6,7 +6,7 @@
 [![Project Status](https://img.shields.io/badge/Status-Completed-success.svg)]()
 [![Academic](https://img.shields.io/badge/Course-CSP650%20UiTM-purple.svg)]()
 
-An intelligent, machine-learning-driven security system designed to detect and classify phishing websites in real time. The system extracts **24 heuristic, lexical, domain, and web-content features** from any target URL and classifies it as either **Legitimate** or **Phishing** using high-performance classification models served through a modern **Flask web application**.
+An intelligent, machine-learning-driven security system designed to detect and classify phishing websites. The system extracts **24 heuristic, lexical, domain, and web-content features** from any target URL and classifies it as either **Legitimate** or **Phishing** using high-performance classification models served through a modern **Flask web application**.
 
 Developed as a Final Year Project for **CSP650 (Computing Project)** at **Universiti Teknologi MARA (UiTM)**.
 
