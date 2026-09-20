@@ -1,0 +1,149 @@
+import numpy as np
+import pandas as pd
+from RandomForest import RandomForest
+from KNN import KNN
+from sklearn.tree import DecisionTreeClassifier
+from SVM import SVM
+from PCA import PCA
+from XGBoostSigmoid import XGBoostSigmoid
+import pickle
+from imblearn.over_sampling import SMOTE
+from collections import Counter
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV, cross_val_score
+import seaborn as sns
+from DecisionTree import DecisionTree
+
+data = pd.read_csv("PhishingData2.csv")
+label_mapping = {'Phishing': -1, 'Legitimate': 1}
+y,levels = pd.factorize(data['Result']) # Get the class labels (phishing or legit) for confusion matrix from dataset
+data['Result'] = data['Result'].map(label_mapping)
+
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# def accuracy(y_true, y_pred):
+    # accuracy = np.sum(y_true == y_pred) / len(y_true)
+    # return accuracy
+
+# rf = RandomForest()
+# rf.fit(X_train.to_numpy(), y_train)
+# predictions = rf.predict(X_test)
+
+# acc = accuracy(y_test, predictions)
+# print(acc)
+
+def accuracy(y_true, y_pred):
+    y_true = y_true.flatten()
+    total_samples = len(y_true)
+    correct_predictions = np.sum(y_true == y_pred)
+    return 100 * (correct_predictions / total_samples)
+
+def train_test_split(X, y, random_state=42, test_size=0.3):
+     # Get number of samples
+    n_samples = X.shape[0]
+
+    # Set the seed for the random number generator
+    np.random.seed(random_state)
+
+    # Shuffle the indices
+    shuffled_indices = np.random.permutation(np.arange(n_samples))
+
+    # Determine the size of the test set
+    test_size = int(n_samples * test_size)
+
+    # Split the indices into test and train
+    test_indices = shuffled_indices[:test_size]
+    train_indices = shuffled_indices[test_size:]
+
+    # Split the features and target arrays into test and train
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = y[train_indices], y[test_indices]
+
+    return X_train, X_test, y_train, y_test    
+
+# Data preprocessing
+X = data.iloc[:, :-1].values
+features_name = X.tolist()
+
+# Principal Component Analysis (PCA)
+# pca = PCA(15)
+# pca.fit(X)
+# X_transformed = pca.transform(X)
+# X_transformed[:,1].shape
+# X = X_transformed
+
+y = data.iloc[:, -1].values.reshape(-1,1)
+
+# print(f"Resampled dataset shape: {Counter(y_resampled)}")
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=41)
+
+y_train = np.where(y_train == -1, 0, 1)
+y_test = np.where(y_test == -1, 0, 1)
+
+scaler = MinMaxScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+sm = SMOTE(random_state=42)
+X_train, y_train = sm.fit_resample(X_train, y_train)
+k_values = [5,10,15]
+metric = ['manhattan', 'euclidean']
+train_accuracies = []
+test_accuracies = []
+
+
+knn_model = KNN(k=10, metric = 'manhattan')
+
+knn_model.fit(X_train, y_train)
+
+knn_train_predict = knn_model.predict(X_train)
+knn_test_predict = knn_model.predict(X_test)
+
+knn_train_acc = accuracy_score(y_train, knn_train_predict)
+knn_test_acc = accuracy_score(y_test, knn_test_predict)
+
+train_accuracies.append(knn_train_acc)
+test_accuracies.append(knn_test_acc)
+
+cm_train_knn = confusion_matrix(y_train, knn_train_predict)
+cm_test_knn = confusion_matrix(y_test, knn_test_predict)
+
+report_train = classification_report(y_train, knn_train_predict, target_names = levels)
+report_test = classification_report(y_test, knn_test_predict, target_names = levels)
+
+# Print results
+print(f"KNN Train Accuracy: {knn_train_acc * 100:.2f}%")
+print(f"KNN Test Accuracy: {knn_test_acc * 100:.2f}%")
+
+print("Classification Report (Training):\n", report_train)
+print("Classification Report (Testing):\n", report_test)
+
+#  --- Visualize the confusion matrix ---
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm_test_knn, annot=True, fmt='d', cmap='Blues', xticklabels=levels, yticklabels=levels)
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix')
+plt.show()
+
+# plt.figure(figsize=(8, 6))
+# plt.plot(metric, train_accuracies, marker='o', label='Training Accuracy')
+# plt.xlabel('Number of trees')
+# plt.ylabel('Accuracy')
+# plt.title('Training Accuracy')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
+# plt.figure(figsize=(8, 6))
+# plt.plot(metric, test_accuracies, marker='o', label='Test Accuracy')
+
+# plt.xlabel('Number of trees')
+# plt.ylabel('Accuracy')
+# plt.title('Test Accuracy')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
